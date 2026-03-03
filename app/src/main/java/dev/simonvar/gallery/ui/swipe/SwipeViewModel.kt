@@ -32,8 +32,15 @@ class SwipeViewModel(application: Application) : AndroidViewModel(application) {
     val isEmpty: Boolean
         get() = !isLoading && currentIndex >= allItems.size
 
+    var isMuted by mutableStateOf(true)
+        private set
+
     val trashCount: Int
         get() = TrashManager.items.size
+
+    fun toggleMute() {
+        isMuted = !isMuted
+    }
 
     init {
         loadMedia()

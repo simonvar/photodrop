@@ -84,6 +84,8 @@ fun SwipeScreen(
                                 item = item,
                                 onSwipeLeft = viewModel::onSwipeLeft,
                                 onSwipeRight = viewModel::onSwipeRight,
+                                isMuted = viewModel.isMuted,
+                                onToggleMute = viewModel::toggleMute,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)

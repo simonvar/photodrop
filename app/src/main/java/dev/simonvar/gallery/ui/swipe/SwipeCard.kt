@@ -5,15 +5,21 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -49,6 +55,8 @@ fun SwipeCard(
     item: MediaItem,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit,
+    isMuted: Boolean,
+    onToggleMute: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
@@ -110,6 +118,7 @@ fun SwipeCard(
         if (item.mediaType == MediaType.VIDEO) {
             VideoPlayer(
                 uri = item.uri,
+                isMuted = isMuted,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -146,6 +155,27 @@ fun SwipeCard(
                     .padding(24.dp)
                     .graphicsLayer { scaleX = 2f; scaleY = 2f },
             )
+        }
+
+        // Mute/unmute toggle for videos
+        if (item.mediaType == MediaType.VIDEO) {
+            IconButton(
+                onClick = onToggleMute,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(12.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = CircleShape,
+                    )
+                    .size(40.dp),
+            ) {
+                Icon(
+                    imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = if (isMuted) "Unmute" else "Mute",
+                    tint = Color.White,
+                )
+            }
         }
     }
 }
