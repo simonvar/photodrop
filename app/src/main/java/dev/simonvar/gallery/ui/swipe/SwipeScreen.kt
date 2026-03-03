@@ -19,8 +19,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +81,8 @@ fun SwipeScreen(
                     )
                 }
                 else -> {
+                    var programmaticSwipe by remember { mutableStateOf<SwipeDirection?>(null) }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxSize(),
@@ -88,6 +95,8 @@ fun SwipeScreen(
                                 isMuted = viewModel.isMuted,
                                 onToggleMute = viewModel::toggleMute,
                                 onTap = { onNavigateToFullscreen(item.id) },
+                                programmaticSwipe = programmaticSwipe,
+                                onProgrammaticSwipeConsumed = { programmaticSwipe = null },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)
@@ -101,16 +110,20 @@ fun SwipeScreen(
                                 .padding(bottom = 16.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            Text(
-                                text = "\u2190 Delete",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                            Text(
-                                text = "Keep \u2192",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
+                            TextButton(onClick = { programmaticSwipe = SwipeDirection.LEFT }) {
+                                Text(
+                                    text = "\u2190 Delete",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                            TextButton(onClick = { programmaticSwipe = SwipeDirection.RIGHT }) {
+                                Text(
+                                    text = "Keep \u2192",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
                     }
                 }

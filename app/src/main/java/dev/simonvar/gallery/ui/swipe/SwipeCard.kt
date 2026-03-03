@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,8 @@ private const val SWIPE_THRESHOLD_FRACTION = 0.4f
 private const val MAX_ROTATION_DEGREES = 15f
 private const val FLY_OFF_DURATION_MS = 300
 
+enum class SwipeDirection { LEFT, RIGHT }
+
 @Composable
 fun SwipeCard(
     item: MediaItem,
@@ -67,11 +70,25 @@ fun SwipeCard(
     isMuted: Boolean,
     onToggleMute: () -> Unit,
     onTap: () -> Unit,
+    programmaticSwipe: SwipeDirection? = null,
+    onProgrammaticSwipeConsumed: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
     val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     var cardWidth by remember { mutableFloatStateOf(1f) }
+
+    LaunchedEffect(programmaticSwipe) {
+        if (programmaticSwipe == null) return@LaunchedEffect
+        val targetX = if (programmaticSwipe == SwipeDirection.RIGHT) cardWidth * 2f else -cardWidth * 2f
+        offset.animateTo(
+            Offset(targetX, 0f),
+            animationSpec = tween(FLY_OFF_DURATION_MS),
+        )
+        if (programmaticSwipe == SwipeDirection.LEFT) onSwipeLeft() else onSwipeRight()
+        offset.snapTo(Offset.Zero)
+        onProgrammaticSwipeConsumed()
+    }
 
     val progress = if (cardWidth > 0f) offset.value.x / cardWidth else 0f
     val rotation = (progress * MAX_ROTATION_DEGREES).coerceIn(-MAX_ROTATION_DEGREES, MAX_ROTATION_DEGREES)
