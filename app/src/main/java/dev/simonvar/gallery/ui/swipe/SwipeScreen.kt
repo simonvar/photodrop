@@ -1,10 +1,10 @@
 package dev.simonvar.gallery.ui.swipe
 
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,8 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,8 +39,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun SwipeScreen(
     onNavigateToTrash: () -> Unit,
     onNavigateToFullscreen: (Long) -> Unit,
-    viewModel: SwipeViewModel = viewModel(),
+    viewModel: SwipeViewModel = viewModel(
+        factory = SwipeViewModel.factory(LocalContext.current.applicationContext as Application),
+    ),
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -47,8 +53,8 @@ fun SwipeScreen(
                     IconButton(onClick = onNavigateToTrash) {
                         BadgedBox(
                             badge = {
-                                if (viewModel.trashCount > 0) {
-                                    Badge { Text("${viewModel.trashCount}") }
+                                if (state.trashCount > 0) {
+                                    Badge { Text("${state.trashCount}") }
                                 }
                             }
                         ) {
@@ -69,10 +75,10 @@ fun SwipeScreen(
             contentAlignment = Alignment.Center,
         ) {
             when {
-                viewModel.isLoading -> {
+                state.isLoading -> {
                     CircularProgressIndicator()
                 }
-                viewModel.isEmpty -> {
+                state.isEmpty -> {
                     Text(
                         text = "No more media to review!",
                         style = MaterialTheme.typography.headlineSmall,
@@ -87,12 +93,12 @@ fun SwipeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        viewModel.currentItem?.let { item ->
+                        state.currentItem?.let { item ->
                             SwipeCard(
                                 item = item,
                                 onSwipeLeft = viewModel::onSwipeLeft,
                                 onSwipeRight = viewModel::onSwipeRight,
-                                isMuted = viewModel.isMuted,
+                                isMuted = state.isMuted,
                                 onToggleMute = viewModel::toggleMute,
                                 onTap = { onNavigateToFullscreen(item.id) },
                                 programmaticSwipe = programmaticSwipe,
