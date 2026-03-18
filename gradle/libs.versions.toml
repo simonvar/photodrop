@@ -1,17 +1,20 @@
 [versions]
 agp = "9.1.0"
-kotlin = "2.3.10"
-coreKtx = "1.17.0"
+kotlin = "2.3.20"
+coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.4"
-composeBom = "2026.02.01"
+activityCompose = "1.13.0"
+composeBom = "2026.03.00"
 navigationCompose = "2.9.7"
 coil = "3.4.0"
-media3 = "1.9.2"
-telephoto = "0.14.0"
+media3 = "1.9.3"
+telephoto = "0.18.0"
+nav3Core = "1.0.1"
+kotlinSerialization = "2.3.20"
+kotlinxSerializationCore = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,9 +40,12 @@ coil-video = { group = "io.coil-kt.coil3", name = "coil-video", version.ref = "c
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 telephoto-zoomable-coil = { group = "me.saket.telephoto", name = "zoomable-image-coil3", version.ref = "telephoto" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization"}

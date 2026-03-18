@@ -11,7 +11,5 @@
 ## Undo Last Action
 - Add `ActionHistory` — stack of `Action(type: TRASH | SKIP | FAVORITE, item: MediaItem)`
 - Record each swipe in the history
-- Show `Snackbar` after every swipe with "Undo" action
 - On undo: pop from history, decrement `currentIndex`, remove from `TrashManager`/`FavoritesManager` if needed
-- Use `SnackbarHostState` in `SwipeScreen`'s `Scaffold`
-- Alternatively: a floating "undo" button (arrow-back icon) visible when history is non-empty
+- a floating "undo" button (arrow-back icon) visible when history is non-empty
