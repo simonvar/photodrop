@@ -1,8 +1,6 @@
 package dev.simonvar.gallery.presentation.home
 
 import android.app.Application
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,14 +33,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.simonvar.gallery.data.MediaItem
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeNode(
     onNavigateToTrash: () -> Unit,
-    onNavigateToMediaItem: (MediaItem) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
     modifier: Modifier = Modifier,
     viewModel: SwipeViewModel = viewModel(
         factory = SwipeViewModel.factory(LocalContext.current.applicationContext as Application),
@@ -106,8 +100,6 @@ fun HomeNode(
                                 onSwipeRight = viewModel::onSwipeRight,
                                 isMuted = state.isMuted,
                                 onToggleMute = viewModel::toggleMute,
-                                onTap = { onNavigateToMediaItem(item) },
-                                sharedTransitionScope = sharedTransitionScope,
                                 programmaticSwipe = programmaticSwipe,
                                 onProgrammaticSwipeConsumed = { programmaticSwipe = null },
                                 modifier = Modifier

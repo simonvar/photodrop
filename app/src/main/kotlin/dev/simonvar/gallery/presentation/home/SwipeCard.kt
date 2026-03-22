@@ -1,15 +1,12 @@
 package dev.simonvar.gallery.presentation.home
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -48,7 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import dev.simonvar.gallery.data.MediaItem
 import dev.simonvar.gallery.data.MediaType
 import dev.simonvar.gallery.ui.block.VideoPlayer
@@ -65,19 +62,16 @@ private const val FLY_OFF_DURATION_MS = 300
 
 enum class SwipeDirection { LEFT, RIGHT }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SwipeCard(
-    item: MediaItem,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit,
-    isMuted: Boolean,
     onToggleMute: () -> Unit,
-    onTap: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
+    item: MediaItem,
+    isMuted: Boolean,
+    modifier: Modifier = Modifier,
     programmaticSwipe: SwipeDirection? = null,
     onProgrammaticSwipeConsumed: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
     val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
@@ -85,7 +79,8 @@ fun SwipeCard(
 
     LaunchedEffect(programmaticSwipe) {
         if (programmaticSwipe == null) return@LaunchedEffect
-        val targetX = if (programmaticSwipe == SwipeDirection.RIGHT) cardWidth * 2f else -cardWidth * 2f
+        val targetX =
+            if (programmaticSwipe == SwipeDirection.RIGHT) cardWidth * 2f else -cardWidth * 2f
         offset.animateTo(
             Offset(targetX, 0f),
             animationSpec = tween(FLY_OFF_DURATION_MS),
@@ -96,7 +91,8 @@ fun SwipeCard(
     }
 
     val progress = if (cardWidth > 0f) offset.value.x / cardWidth else 0f
-    val rotation = (progress * MAX_ROTATION_DEGREES).coerceIn(-MAX_ROTATION_DEGREES, MAX_ROTATION_DEGREES)
+    val rotation =
+        (progress * MAX_ROTATION_DEGREES).coerceIn(-MAX_ROTATION_DEGREES, MAX_ROTATION_DEGREES)
 
     Box(
         modifier = modifier
@@ -104,9 +100,8 @@ fun SwipeCard(
             .offset { IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt()) }
             .rotate(rotation)
             .clip(RoundedCornerShape(16.dp))
-            .pointerInput(item.id) {
-                detectTapGestures(onTap = { onTap() })
-            }
+            .border(1.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .pointerInput(item.id) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->
@@ -157,19 +152,12 @@ fun SwipeCard(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            with(sharedTransitionScope) {
-                AsyncImage(
-                    model = item.uri,
-                    contentDescription = item.displayName,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .sharedElement(
-                            rememberSharedContentState(key = "media_image_${item.id}"),
-                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        )
-                        .fillMaxSize(),
-                )
-            }
+            ZoomableAsyncImage(
+                model = item.uri,
+                contentDescription = item.displayName,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
 
         // Swipe overlays
@@ -220,32 +208,21 @@ fun SwipeCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White,
             )
+            // Mute/unmute toggle for videos
+            if (item.mediaType == MediaType.VIDEO) {
+                IconButton(onClick = onToggleMute) {
+                    Icon(
+                        imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                        contentDescription = if (isMuted) "Unmute" else "Mute",
+                        tint = Color.White,
+                    )
+                }
+            }
             Text(
                 text = formattedSize,
                 style = MaterialTheme.typography.bodySmall,
                 color = if (sizeMb > 50) Color.Red else Color.White,
             )
-        }
-
-        // Mute/unmute toggle for videos
-        if (item.mediaType == MediaType.VIDEO) {
-            IconButton(
-                onClick = onToggleMute,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(12.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape,
-                    )
-                    .size(40.dp),
-            ) {
-                Icon(
-                    imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = if (isMuted) "Unmute" else "Mute",
-                    tint = Color.White,
-                )
-            }
         }
     }
 }
