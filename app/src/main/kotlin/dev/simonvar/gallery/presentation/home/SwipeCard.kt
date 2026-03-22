@@ -9,13 +9,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -94,7 +94,9 @@ fun SwipeCard(
     val rotation =
         (progress * MAX_ROTATION_DEGREES).coerceIn(-MAX_ROTATION_DEGREES, MAX_ROTATION_DEGREES)
 
-    Box(
+    val infoState = rememberMediaInfoBarState(item)
+
+    Column(
         modifier = modifier
             .onSizeChanged { cardWidth = it.width.toFloat() }
             .offset { IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt()) }
@@ -144,85 +146,111 @@ fun SwipeCard(
                 )
             },
     ) {
-        // Media content
-        if (item.mediaType == MediaType.VIDEO) {
-            VideoPlayer(
-                uri = item.uri,
-                isMuted = isMuted,
-                modifier = Modifier.fillMaxSize(),
-            )
-        } else {
-            ZoomableAsyncImage(
-                model = item.uri,
-                contentDescription = item.displayName,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        // Swipe overlays
-        val absProgress = abs(progress)
-        if (progress > 0.05f) {
-            // Swiping right — keep
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Keep",
-                tint = Color.Green.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(24.dp)
-                    .graphicsLayer { scaleX = 2f; scaleY = 2f },
-            )
-        }
-        if (progress < -0.05f) {
-            // Swiping left — delete
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Delete",
-                tint = Color.Red.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(24.dp)
-                    .graphicsLayer { scaleX = 2f; scaleY = 2f },
-            )
-        }
-
-        // Date and size overlay
-        val dateFormat = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
-        val formattedDate = remember(item.dateAdded) {
-            dateFormat.format(Date(item.dateAdded * 1000))
-        }
-        val sizeMb = item.size / 1_048_576.0
-        val formattedSize = remember(item.size) { String.format(Locale.US, "%.1f MB", sizeMb) }
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .background(Color.Black.copy(alpha = 0.6f))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = formattedDate,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White,
-            )
-            // Mute/unmute toggle for videos
+        // Media content + swipe overlays
+        Box(modifier = Modifier.weight(1f)) {
             if (item.mediaType == MediaType.VIDEO) {
-                IconButton(onClick = onToggleMute) {
-                    Icon(
-                        imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = if (isMuted) "Unmute" else "Mute",
-                        tint = Color.White,
-                    )
-                }
+                VideoPlayer(
+                    uri = item.uri,
+                    isMuted = isMuted,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                ZoomableAsyncImage(
+                    model = item.uri,
+                    contentDescription = item.displayName,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
-            Text(
-                text = formattedSize,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (sizeMb > 50) Color.Red else Color.White,
-            )
+
+            // Swipe overlays
+            val absProgress = abs(progress)
+            if (progress > 0.05f) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Keep",
+                    tint = Color.Green.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(24.dp)
+                        .graphicsLayer { scaleX = 2f; scaleY = 2f },
+                )
+            }
+            if (progress < -0.05f) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Delete",
+                    tint = Color.Red.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(24.dp)
+                        .graphicsLayer { scaleX = 2f; scaleY = 2f },
+                )
+            }
         }
+
+        // Info bar below media
+        MediaInfoBar(
+            state = infoState,
+            isMuted = isMuted,
+            onToggleMute = onToggleMute,
+        )
+    }
+}
+
+private data class MediaInfoBarState(
+    val formattedDate: String,
+    val formattedSize: String,
+    val sizeMb: Double,
+    val mediaType: MediaType,
+)
+
+@Composable
+private fun rememberMediaInfoBarState(item: MediaItem): MediaInfoBarState {
+    return remember(item) {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val formattedDate = dateFormat.format(Date(item.dateAdded * 1000))
+        val sizeMb = item.size / 1_048_576.0
+        val formattedSize = String.format(Locale.US, "%.1f MB", sizeMb)
+        MediaInfoBarState(formattedDate, formattedSize, sizeMb, item.mediaType)
+    }
+}
+
+@Composable
+private fun MediaInfoBar(
+    state: MediaInfoBarState,
+    isMuted: Boolean,
+    onToggleMute: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .height(48.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = state.formattedDate,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (state.mediaType == MediaType.VIDEO) {
+            IconButton(onClick = onToggleMute) {
+                Icon(
+                    imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff
+                        else Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = if (isMuted) "Unmute" else "Mute",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+        Text(
+            text = state.formattedSize,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (state.sizeMb > 50) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
