@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.simonvar.gallery"
+    namespace = "dev.simonvar.photodrop"
     compileSdk {
         version = release(36)
     }

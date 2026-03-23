@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">phodrop</string>
+    <string name="app_name">photodrop</string>
     <string name="gallery_cleanup_title">Gallery Cleanup</string>
     <string name="trash">Trash</string>
     <string name="no_more_media">No more media to review!</string>
