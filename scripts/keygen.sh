@@ -156,15 +156,15 @@ ${BOLD}PASSWORD:${NC}
 
 ${BOLD}EXAMPLES:${NC}
     # Generate a new keystore with auto-generated password
-    $(basename "$0") generate --output upload.keystore --alias blink \\
-        --cn "Blink Map" --o "Company" --c RU --gen-password
+    $(basename "$0") generate --output upload.keystore --alias <name> \\
+        --cn "domain.com" --o "Company" --c RU --gen-password
 
     # Export encrypted key for Google Play
-    $(basename "$0") pepk --keystore upload.keystore --alias blink \\
+    $(basename "$0") pepk --keystore upload.keystore --alias <name> \\
         --output pepk_out.zip --encryption-key <hex>
 
     # Export PEM certificate
-    $(basename "$0") pem --keystore upload.keystore --alias blink \\
+    $(basename "$0") pem --keystore upload.keystore --alias <name> \\
         --output upload.pem
 EOF
 }
