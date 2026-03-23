@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "dev.simonvar.gallery"
+        applicationId = "dev.simonvar.photodrop"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
@@ -36,6 +36,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+        }
         release {
             isDebuggable = false
             isMinifyEnabled = true
