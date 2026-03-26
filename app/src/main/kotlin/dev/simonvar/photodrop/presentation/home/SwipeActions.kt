@@ -24,7 +24,7 @@ class SwipeLeftAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
         scope: ActionScope<SwipeState, SwipeEvent>,
     ) {
         scope.currentState.currentItem?.let { item ->
-            dependencies.trashManager.add(item)
+            dependencies.trashRepository.add(item)
             scope.setState {
                 copy(
                     currentIndex = currentIndex + 1,
@@ -59,7 +59,7 @@ class UndoAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
         val current = scope.currentState
         val lastEntry = current.history.lastOrNull() ?: return
         if (lastEntry.type == ActionType.TRASH) {
-            dependencies.trashManager.remove(lastEntry.item)
+            dependencies.trashRepository.remove(lastEntry.item)
         }
         scope.setState {
             copy(

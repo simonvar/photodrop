@@ -27,6 +27,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,12 +36,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.simonvar.photodrop.R
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaRepositoryImpl
 import dev.simonvar.photodrop.data.MediaType
-import dev.simonvar.photodrop.data.TrashManager
+import dev.simonvar.photodrop.data.trash.LocalTrashRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,12 +50,14 @@ fun TrashNode(
     modifier: Modifier = Modifier,
 ) {
     val activity = LocalActivity.current!!
+    val trashRepository = LocalTrashRepository.current
+    val items by trashRepository.items.collectAsStateWithLifecycle(initialValue = emptyList())
 
     val deleteLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            TrashManager.clear()
+            trashRepository.clear()
         }
     }
 
@@ -65,7 +68,6 @@ fun TrashNode(
         topBar = {
             TopAppBar(
                 title = {
-                    val items = TrashManager.items
                     val count = items.size
                     val totalBytes = items.sumOf { it.size }
                     val totalMb = totalBytes / 1_048_576.0
@@ -91,14 +93,14 @@ fun TrashNode(
                     }
                 },
                 actions = {
-                    if (TrashManager.items.isNotEmpty()) {
+                    if (items.isNotEmpty()) {
                         IconButton(onClick = {
-                            val uris = TrashManager.items.map { it.uri }
-                            val request =  repository.createDeleteRequest(activity, uris)
+                            val uris = items.map { it.uri }
+                            val request = repository.createDeleteRequest(activity, uris)
                             if (request != null) {
                                 deleteLauncher.launch(request)
                             } else {
-                                TrashManager.clear()
+                                trashRepository.clear()
                             }
                         }) {
                             Icon(
@@ -111,7 +113,7 @@ fun TrashNode(
             )
         },
     ) { padding ->
-        if (TrashManager.items.isEmpty()) {
+        if (items.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -131,12 +133,12 @@ fun TrashNode(
                     .padding(padding),
             ) {
                 items(
-                    items = TrashManager.items.toList(),
+                    items = items,
                     key = { it.id },
                 ) { item ->
                     TrashCell(
                         item = item,
-                        onRestore = { TrashManager.remove(item) },
+                        onRestore = { trashRepository.remove(item) },
                     )
                 }
             }

@@ -1,32 +1,36 @@
 package dev.simonvar.photodrop.presentation.home
 
 import android.app.Application
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.simonvar.photodrop.arch.SailViewModel
 import dev.simonvar.photodrop.data.MediaRepositoryImpl
-import dev.simonvar.photodrop.data.TrashManager
+import dev.simonvar.photodrop.data.trash.TrashRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class SwipeViewModel(application: Application) : SailViewModel<SwipeState, SwipeEvent>(SwipeState()) {
+class SwipeViewModel(
+    application: Application,
+    trashRepository: TrashRepository,
+) : SailViewModel<SwipeState, SwipeEvent>(SwipeState()) {
 
     private val repository = MediaRepositoryImpl(application)
 
     override val dependencies = SwipeDependencies(
         coroutineScope = viewModelScope,
         repository = repository,
-        trashManager = TrashManager,
+        trashRepository = trashRepository,
     )
 
     init {
         dispatch(LoadMediaAction(), Dispatchers.IO)
 
         viewModelScope.launch {
-            snapshotFlow { TrashManager.items.size }
+            trashRepository.items
+                .map { it.size }
                 .collect { count -> updateState { copy(trashCount = count) } }
         }
     }
@@ -40,8 +44,11 @@ class SwipeViewModel(application: Application) : SailViewModel<SwipeState, Swipe
     fun toggleMute() = dispatch(ToggleMuteAction(), Dispatchers.Main)
 
     companion object {
-        fun factory(application: Application): ViewModelProvider.Factory = viewModelFactory {
-            initializer { SwipeViewModel(application) }
+        fun factory(
+            application: Application,
+            trashRepository: TrashRepository,
+        ): ViewModelProvider.Factory = viewModelFactory {
+            initializer { SwipeViewModel(application, trashRepository) }
         }
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.simonvar.photodrop.R
+import dev.simonvar.photodrop.data.trash.LocalTrashRepository
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -44,7 +45,10 @@ fun HomeNode(
     onNavigateToTrash: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SwipeViewModel = viewModel(
-        factory = SwipeViewModel.factory(LocalContext.current.applicationContext as Application),
+        factory = SwipeViewModel.factory(
+            application = LocalContext.current.applicationContext as Application,
+            trashRepository = LocalTrashRepository.current,
+        ),
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
