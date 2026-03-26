@@ -8,7 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
-import dev.simonvar.photodrop.data.trash.LocalTrashRepository
+import dev.simonvar.photodrop.di.LocalDepScope
 import dev.simonvar.photodrop.ui.block.PermissionGate
 import dev.simonvar.photodrop.presentation.main.MainNode
 import dev.simonvar.photodrop.ui.theme.GalleryTheme
@@ -19,11 +19,11 @@ class PhotodropActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val appDependencies = (application as PhotodropApplication).dependencies
+        val di = (application as PhotodropApplication).di
 
         setContent {
             CompositionLocalProvider(
-                LocalTrashRepository provides appDependencies.trashRepository,
+                LocalDepScope provides di,
             ) {
                 GalleryTheme {
                     PermissionGate {

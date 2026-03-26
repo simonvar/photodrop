@@ -35,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.simonvar.photodrop.R
-import dev.simonvar.photodrop.data.trash.LocalTrashRepository
+import dev.simonvar.photodrop.di.LocalDepScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -47,7 +47,7 @@ fun HomeNode(
     viewModel: SwipeViewModel = viewModel(
         factory = SwipeViewModel.factory(
             application = LocalContext.current.applicationContext as Application,
-            trashRepository = LocalTrashRepository.current,
+            trashRepository = LocalDepScope.current.trashRepository,
         ),
     ),
 ) {

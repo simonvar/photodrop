@@ -8,7 +8,7 @@ import coil3.video.VideoFrameDecoder
 
 class PhotodropApplication : Application(), SingletonImageLoader.Factory {
 
-    val dependencies: AppDependencies by lazy { AppDependencies() }
+    val di: ApplicationDepScope by lazy { ApplicationDepScope(this) }
 
     override fun onCreate() {
         super.onCreate()

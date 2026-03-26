@@ -41,7 +41,7 @@ import coil3.compose.AsyncImage
 import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaRepositoryImpl
 import dev.simonvar.photodrop.data.MediaType
-import dev.simonvar.photodrop.data.trash.LocalTrashRepository
+import dev.simonvar.photodrop.di.LocalDepScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +50,7 @@ fun TrashNode(
     modifier: Modifier = Modifier,
 ) {
     val activity = LocalActivity.current!!
-    val trashRepository = LocalTrashRepository.current
+    val trashRepository = LocalDepScope.current.trashRepository
     val items by trashRepository.items.collectAsStateWithLifecycle(initialValue = emptyList())
 
     val deleteLauncher = rememberLauncherForActivityResult(
