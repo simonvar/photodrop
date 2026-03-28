@@ -4,6 +4,8 @@ import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +24,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,12 +37,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import dev.simonvar.photodrop.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaType
 import dev.simonvar.photodrop.di.LocalDepScope
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,11 +62,23 @@ fun TrashNode(
     val mediaRepository = depScope.mediaRepository
     val items by trashRepository.items.collectAsStateWithLifecycle(initialValue = emptyList())
 
+    val animations = remember {
+        listOf(
+            R.raw.hero_fire_inferno,
+            R.raw.hero_water_whirlpool,
+            R.raw.hero_abstract_airstream,
+        )
+    }
+    var isAnimationVisible by remember { mutableStateOf(false) }
+    var animation by remember { mutableIntStateOf(animations.random()) }
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animation))
+
     val deleteLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             trashRepository.clear()
+            isAnimationVisible = true
         }
     }
 
@@ -95,6 +120,8 @@ fun TrashNode(
                                 deleteLauncher.launch(request)
                             } else {
                                 trashRepository.clear()
+                                animation = animations.random()
+                                isAnimationVisible = true
                             }
                         }) {
                             Icon(
@@ -133,8 +160,37 @@ fun TrashNode(
                     TrashCell(
                         item = item,
                         onRestore = { trashRepository.remove(item) },
+                        modifier = Modifier.aspectRatio(1f)
                     )
                 }
+            }
+        }
+
+        if (isAnimationVisible) {
+            val progress by animateLottieCompositionAsState(
+                composition,
+                isPlaying = true,
+                iterations = 1
+            )
+
+            LaunchedEffect(progress) {
+                if (progress == 1f) {
+                    isAnimationVisible = false
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier.fillMaxSize(),
+                    applyOpacityToLayers = true,
+                    contentScale = ContentScale.FillBounds
+                )
             }
         }
     }
@@ -144,10 +200,10 @@ fun TrashNode(
 private fun TrashCell(
     item: MediaItem,
     onRestore: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
-            .aspectRatio(1f)
+        modifier = modifier
             .padding(2.dp),
     ) {
         AsyncImage(
