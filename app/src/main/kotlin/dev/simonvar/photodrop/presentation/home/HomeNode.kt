@@ -134,7 +134,10 @@ fun HomeNode(
                             onUndo = viewModel::onUndo,
                             onKeep = { programmaticSwipe = SwipeDirection.RIGHT },
                             canUndo = state.canUndo,
-                            modifier = Modifier.padding(bottom = 16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                                .padding(horizontal = 16.dp),
                         )
                     }
                 }

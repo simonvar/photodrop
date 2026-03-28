@@ -34,13 +34,13 @@ fun ActionButtonsRow(
     Surface(
         modifier = modifier,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         Row(
             modifier = Modifier
                 .height(64.dp)
                 .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(
@@ -76,12 +76,14 @@ fun ActionButtonsRow(
                 Text(
                     text = stringResource(R.string.action_keep),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Icon(
                     painter = painterResource(R.drawable.ic_expand_circle_right_24),
                     contentDescription = null,
                     modifier = Modifier.size(ButtonDefaults.IconSize),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
