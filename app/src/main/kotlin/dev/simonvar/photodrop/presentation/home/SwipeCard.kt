@@ -44,7 +44,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -54,9 +54,11 @@ import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaType
 import dev.simonvar.photodrop.ui.block.VideoPlayer
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -210,14 +212,24 @@ private data class MediaInfoBarState(
     val mediaType: MediaType,
 )
 
+private val DateFormat = LocalDate.Format {
+    dayOfMonth()
+    char('.')
+    monthNumber()
+    char('.')
+    year()
+}
+
 @Composable
 private fun rememberMediaInfoBarState(item: MediaItem): MediaInfoBarState {
-    val context = LocalContext.current
+    val res = LocalResources.current
     return remember(item) {
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-        val formattedDate = dateFormat.format(Date(item.dateAdded * 1000))
+        val localDate = Instant
+            .fromEpochSeconds(item.addedAt.epochSeconds)
+            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val formattedDate = DateFormat.format(localDate)
         val sizeMb = item.size / 1_048_576.0
-        val formattedSize = context.getString(R.string.size_mb, sizeMb)
+        val formattedSize = res.getString(R.string.size_mb, sizeMb)
         MediaInfoBarState(formattedDate, formattedSize, sizeMb, item.mediaType)
     }
 }

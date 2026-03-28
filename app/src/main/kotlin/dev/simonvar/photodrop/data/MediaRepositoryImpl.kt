@@ -8,6 +8,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.IntentSenderRequest
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 
 class MediaRepositoryImpl(private val context: Context) {
 
@@ -27,14 +29,13 @@ class MediaRepositoryImpl(private val context: Context) {
             MediaStore.Images.Media.DATE_ADDED,
             MediaStore.Images.Media.SIZE,
         )
-        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
         context.contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             projection,
             null,
             null,
-            sortOrder,
+            null,
         )?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
@@ -52,7 +53,7 @@ class MediaRepositoryImpl(private val context: Context) {
                         uri = uri,
                         mediaType = MediaType.IMAGE,
                         displayName = cursor.getString(nameCol),
-                        dateAdded = cursor.getLong(dateCol),
+                        addedAt = Instant.fromEpochSeconds(cursor.getLong(dateCol)),
                         size = cursor.getLong(sizeCol),
                     )
                 )
@@ -95,8 +96,8 @@ class MediaRepositoryImpl(private val context: Context) {
                         uri = uri,
                         mediaType = MediaType.VIDEO,
                         displayName = cursor.getString(nameCol),
-                        dateAdded = cursor.getLong(dateCol),
-                        duration = cursor.getLong(durCol),
+                        addedAt = Instant.fromEpochSeconds(cursor.getLong(dateCol)),
+                        duration = cursor.getLong(durCol).milliseconds,
                         size = cursor.getLong(sizeCol),
                     )
                 )
@@ -116,20 +117,22 @@ class MediaRepositoryImpl(private val context: Context) {
             MediaStore.Images.Media.DATE_ADDED,
             MediaStore.Images.Media.SIZE,
         )
-        context.contentResolver.query(
-            imageUri, imageProjection, null, null, null
-        )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                return MediaItem(
-                    id = id,
-                    uri = imageUri,
-                    mediaType = MediaType.IMAGE,
-                    displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)),
-                    dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)),
-                    size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)),
-                )
+        context.contentResolver
+            .query(imageUri, imageProjection, null, null, null)
+            ?.use { cursor ->
+                val dateAddedIndex =
+                    cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+                if (cursor.moveToFirst()) {
+                    return MediaItem(
+                        id = id,
+                        uri = imageUri,
+                        mediaType = MediaType.IMAGE,
+                        displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)),
+                        addedAt = Instant.fromEpochSeconds(cursor.getLong(dateAddedIndex)),
+                        size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)),
+                    )
+                }
             }
-        }
 
         // Try videos
         val videoUri = ContentUris.withAppendedId(
@@ -142,21 +145,25 @@ class MediaRepositoryImpl(private val context: Context) {
             MediaStore.Video.Media.DURATION,
             MediaStore.Video.Media.SIZE,
         )
-        context.contentResolver.query(
-            videoUri, videoProjection, null, null, null
-        )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                return MediaItem(
-                    id = id,
-                    uri = videoUri,
-                    mediaType = MediaType.VIDEO,
-                    displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)),
-                    dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)),
-                    duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)),
-                    size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)),
-                )
+        context.contentResolver
+            .query(videoUri, videoProjection, null, null, null)
+            ?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val dateAddedIndex =
+                        cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+                    val durationIndex =
+                        cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+                    return MediaItem(
+                        id = id,
+                        uri = videoUri,
+                        mediaType = MediaType.VIDEO,
+                        displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)),
+                        addedAt = Instant.fromEpochSeconds(cursor.getLong(dateAddedIndex)),
+                        duration = cursor.getLong(durationIndex).milliseconds,
+                        size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)),
+                    )
+                }
             }
-        }
 
         return null
     }

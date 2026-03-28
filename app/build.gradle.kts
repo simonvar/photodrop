@@ -70,6 +70,7 @@ kotlin {
 dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.datetime)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
