@@ -1,4 +1,4 @@
-package dev.simonvar.photodrop.data
+package dev.simonvar.photodrop.data.media
 
 import android.app.Activity
 import android.app.RecoverableSecurityException
@@ -8,12 +8,14 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.IntentSenderRequest
+import dev.simonvar.photodrop.data.MediaItem
+import dev.simonvar.photodrop.data.MediaType
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
-class MediaRepositoryImpl(private val context: Context) {
+class MediaRepositoryImpl(private val context: Context) : MediaRepository {
 
-    fun loadAllMedia(): List<MediaItem> {
+    override fun loadAllMedia(): List<MediaItem> {
         val items = mutableListOf<MediaItem>()
         items.addAll(queryImages())
         items.addAll(queryVideos())
@@ -106,7 +108,7 @@ class MediaRepositoryImpl(private val context: Context) {
         return items
     }
 
-    fun findItemById(id: Long): MediaItem? {
+    override fun findItemById(id: Long): MediaItem? {
         // Try images first
         val imageUri = ContentUris.withAppendedId(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
@@ -168,7 +170,7 @@ class MediaRepositoryImpl(private val context: Context) {
         return null
     }
 
-    fun createDeleteRequest(
+    override fun createDeleteRequest(
         activity: Activity,
         uris: List<Uri>,
     ): IntentSenderRequest? {

@@ -1,27 +1,24 @@
 package dev.simonvar.photodrop.presentation.home
 
-import android.app.Application
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.simonvar.photodrop.arch.SailViewModel
-import dev.simonvar.photodrop.data.MediaRepositoryImpl
+import dev.simonvar.photodrop.data.media.MediaRepository
 import dev.simonvar.photodrop.data.trash.TrashRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class SwipeViewModel(
-    application: Application,
+    mediaRepository: MediaRepository,
     trashRepository: TrashRepository,
 ) : SailViewModel<SwipeState, SwipeEvent>(SwipeState()) {
 
-    private val repository = MediaRepositoryImpl(application)
-
     override val dependencies = SwipeDependencies(
         coroutineScope = viewModelScope,
-        repository = repository,
+        repository = mediaRepository,
         trashRepository = trashRepository,
     )
 
@@ -45,10 +42,10 @@ class SwipeViewModel(
 
     companion object {
         fun factory(
-            application: Application,
+            mediaRepository: MediaRepository,
             trashRepository: TrashRepository,
         ): ViewModelProvider.Factory = viewModelFactory {
-            initializer { SwipeViewModel(application, trashRepository) }
+            initializer { SwipeViewModel(mediaRepository, trashRepository) }
         }
     }
 }

@@ -28,7 +28,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +38,6 @@ import dev.simonvar.photodrop.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.simonvar.photodrop.data.MediaItem
-import dev.simonvar.photodrop.data.MediaRepositoryImpl
 import dev.simonvar.photodrop.data.MediaType
 import dev.simonvar.photodrop.di.LocalDepScope
 
@@ -50,7 +48,9 @@ fun TrashNode(
     modifier: Modifier = Modifier,
 ) {
     val activity = LocalActivity.current!!
-    val trashRepository = LocalDepScope.current.trashRepository
+    val depScope = LocalDepScope.current
+    val trashRepository = depScope.trashRepository
+    val mediaRepository = depScope.mediaRepository
     val items by trashRepository.items.collectAsStateWithLifecycle(initialValue = emptyList())
 
     val deleteLauncher = rememberLauncherForActivityResult(
@@ -60,8 +60,6 @@ fun TrashNode(
             trashRepository.clear()
         }
     }
-
-    val repository = remember { MediaRepositoryImpl(activity) }
 
     Scaffold(
         modifier = modifier,
@@ -96,7 +94,7 @@ fun TrashNode(
                     if (items.isNotEmpty()) {
                         IconButton(onClick = {
                             val uris = items.map { it.uri }
-                            val request = repository.createDeleteRequest(activity, uris)
+                            val request = mediaRepository.createDeleteRequest(activity, uris)
                             if (request != null) {
                                 deleteLauncher.launch(request)
                             } else {
