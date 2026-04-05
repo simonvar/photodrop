@@ -23,4 +23,19 @@
     <string name="media_access_rationale">Приложению нужен доступ к вашим фото и видео для очистки галереи.</string>
     <string name="open_settings">Открыть настройки</string>
     <string name="grant_permission">Предоставить доступ</string>
+    <string name="media_details">Подробности</string>
+    <string name="label_date">Дата</string>
+    <string name="label_file_name">Файл</string>
+    <string name="label_size">Размер</string>
+    <string name="label_type">Тип</string>
+    <string name="label_resolution">Разрешение</string>
+    <string name="label_album">Альбом</string>
+    <string name="label_orientation">Ориентация</string>
+    <string name="label_favorite">Избранное</string>
+    <string name="label_duration">Длительность</string>
+    <string name="label_yes">Да</string>
+    <string name="label_no">Нет</string>
+    <string name="label_unknown">Неизвестно</string>
+    <string name="resolution_format">%1$d x %2$d</string>
+    <string name="duration_format">%1$d мин %2$d с</string>
 </resources>
