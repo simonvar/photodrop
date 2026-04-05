@@ -48,7 +48,7 @@ jobs:
           echo "- **Next dev version:** $NEXT" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify tag does not exist
         env:
