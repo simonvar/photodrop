@@ -40,13 +40,19 @@ fun HomeNode(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showBucketPicker by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             HomeTopBar(
+                buckets = state.buckets,
+                enabledBuckets = state.enabledBuckets,
+                totalCount = state.allItems.size,
+                filteredCount = state.items.size,
                 trashCount = state.trashCount,
                 favoritesCount = state.favoritesCount,
+                onTitleClick = { showBucketPicker = true },
                 onNavigateToTrash = onNavigateToTrash,
                 onNavigateToFavorites = onNavigateToFavorites,
             )
@@ -148,5 +154,15 @@ fun HomeNode(
                 }
             }
         }
+    }
+
+    if (showBucketPicker) {
+        BucketPickerBottomSheet(
+            buckets = state.buckets,
+            enabledBuckets = state.enabledBuckets,
+            totalCount = state.allItems.size,
+            onToggleBucket = viewModel::toggleBucket,
+            onDismiss = { showBucketPicker = false },
+        )
     }
 }

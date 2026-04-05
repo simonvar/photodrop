@@ -43,4 +43,6 @@
     <string name="favorites_empty">Пока нет избранного</string>
     <string name="add_to_favorites">Добавить в избранное</string>
     <string name="remove_from_favorites">Удалить из избранного</string>
+    <string name="bucket_all">Все</string>
+    <string name="bucket_multiple">Разные</string>
 </resources>

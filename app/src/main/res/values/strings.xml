@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">photodrop</string>
     <string name="gallery_cleanup_title">Gallery Cleanup</string>
+    <string name="bucket_all">All</string>
+    <string name="bucket_multiple">Multiple</string>
     <string name="trash">Trash</string>
     <string name="no_more_media">No more media to review!</string>
     <string name="action_delete">Delete</string>

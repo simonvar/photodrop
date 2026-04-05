@@ -40,10 +40,17 @@ class SwipeViewModel(
 
     fun toggleMute() = dispatch(ToggleMuteAction(), Dispatchers.Main)
 
+    fun toggleBucket(bucketName: String? = null) = dispatch(ToggleBucketAction(bucketName), Dispatchers.Main)
+
     fun onFavoriteChanged(itemId: Long, isFavorite: Boolean) {
         updateState {
-            val updated = items.map { if (it.id == itemId) it.copy(isFavorite = isFavorite) else it }
-            copy(items = updated, favoritesCount = updated.count { it.isFavorite })
+            val updatedAll = allItems.map { if (it.id == itemId) it.copy(isFavorite = isFavorite) else it }
+            val updatedFiltered = items.map { if (it.id == itemId) it.copy(isFavorite = isFavorite) else it }
+            copy(
+                allItems = updatedAll,
+                items = updatedFiltered,
+                favoritesCount = updatedAll.count { it.isFavorite },
+            )
         }
     }
 
