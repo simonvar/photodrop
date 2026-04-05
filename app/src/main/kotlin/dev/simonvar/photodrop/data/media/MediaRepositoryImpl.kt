@@ -24,14 +24,23 @@ class MediaRepositoryImpl(private val context: Context) : MediaRepository {
         return items
     }
 
-    private fun queryImages(): List<MediaItem> {
+    override fun loadFavoriteMedia(): List<MediaItem> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return emptyList()
+        val items = mutableListOf<MediaItem>()
+        items.addAll(queryImages(selection = "${MediaStore.Images.Media.IS_FAVORITE} = 1"))
+        items.addAll(queryVideos(selection = "${MediaStore.Video.Media.IS_FAVORITE} = 1"))
+        items.sortByDescending { it.takenAt }
+        return items
+    }
+
+    private fun queryImages(selection: String? = null): List<MediaItem> {
         val items = mutableListOf<MediaItem>()
         val projection = buildImageProjection()
 
         context.contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             projection,
-            null,
+            selection,
             null,
             null,
         )?.use { cursor ->
@@ -73,14 +82,14 @@ class MediaRepositoryImpl(private val context: Context) : MediaRepository {
         return items
     }
 
-    private fun queryVideos(): List<MediaItem> {
+    private fun queryVideos(selection: String? = null): List<MediaItem> {
         val items = mutableListOf<MediaItem>()
         val projection = buildVideoProjection()
 
         context.contentResolver.query(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             projection,
-            null,
+            selection,
             null,
             null,
         )?.use { cursor ->
@@ -201,6 +210,21 @@ class MediaRepositoryImpl(private val context: Context) : MediaRepository {
                     return IntentSenderRequest.Builder(intentSender).build()
                 }
             }
+            null
+        }
+    }
+
+    override fun createFavoriteRequest(
+        activity: Activity,
+        uris: List<Uri>,
+        isFavorite: Boolean,
+    ): IntentSenderRequest? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val pendingIntent = MediaStore.createFavoriteRequest(
+                activity.contentResolver, uris, isFavorite
+            )
+            IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+        } else {
             null
         }
     }

@@ -38,4 +38,9 @@
     <string name="label_unknown">Неизвестно</string>
     <string name="resolution_format">%1$d x %2$d</string>
     <string name="duration_format">%1$d мин %2$d с</string>
+    <string name="share">Поделиться</string>
+    <string name="favorites">Избранное</string>
+    <string name="favorites_empty">Пока нет избранного</string>
+    <string name="add_to_favorites">Добавить в избранное</string>
+    <string name="remove_from_favorites">Удалить из избранного</string>
 </resources>

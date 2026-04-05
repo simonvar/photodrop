@@ -1,13 +1,17 @@
 package dev.simonvar.photodrop.presentation.home
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.simonvar.photodrop.R
+import dev.simonvar.photodrop.di.LocalDepScope
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaType
@@ -77,6 +82,7 @@ fun SwipeCard(
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit,
     onToggleMute: () -> Unit,
+    onFavoriteChanged: (itemId: Long, isFavorite: Boolean) -> Unit,
     item: MediaItem,
     isMuted: Boolean,
     isFront: Boolean,
@@ -244,9 +250,26 @@ fun SwipeCard(
         )
     }
 
+    val activity = LocalActivity.current!!
+    val mediaRepository = LocalDepScope.current.mediaRepository
+    var currentFavoriteState by remember(item.id) { mutableStateOf(item.isFavorite) }
+
+    val favoriteLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            currentFavoriteState = !currentFavoriteState
+            onFavoriteChanged(item.id, currentFavoriteState)
+        }
+    }
+
+    val adjustedDetailState = remember(detailState, currentFavoriteState) {
+        detailState.copy(isFavorite = currentFavoriteState)
+    }
+
     if (showDetails) {
         MediaDetailBottomSheet(
-            state = detailState,
+            state = adjustedDetailState,
             onDismiss = { showDetails = false },
             onShare = {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -256,6 +279,16 @@ fun SwipeCard(
                 }
                 context.startActivity(Intent.createChooser(shareIntent, null))
             },
+            onFavoriteToggle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                {
+                    val request = mediaRepository.createFavoriteRequest(
+                        activity, listOf(item.uri), !currentFavoriteState
+                    )
+                    if (request != null) {
+                        favoriteLauncher.launch(request)
+                    }
+                }
+            } else null,
         )
     }
 }
@@ -386,6 +419,7 @@ private fun MediaDetailBottomSheet(
     state: MediaDetailState,
     onDismiss: () -> Unit,
     onShare: () -> Unit,
+    onFavoriteToggle: (() -> Unit)?,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -404,11 +438,27 @@ private fun MediaDetailBottomSheet(
                     text = stringResource(R.string.media_details),
                     style = MaterialTheme.typography.titleLarge,
                 )
-                IconButton(onClick = onShare) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_share_24),
-                        contentDescription = stringResource(R.string.share),
-                    )
+                Row {
+                    if (onFavoriteToggle != null) {
+                        IconButton(onClick = onFavoriteToggle) {
+                            Icon(
+                                painter = painterResource(
+                                    if (state.isFavorite) R.drawable.ic_favorite_24
+                                    else R.drawable.ic_favorite_border_24
+                                ),
+                                contentDescription = stringResource(
+                                    if (state.isFavorite) R.string.remove_from_favorites
+                                    else R.string.add_to_favorites
+                                ),
+                            )
+                        }
+                    }
+                    IconButton(onClick = onShare) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_share_24),
+                            contentDescription = stringResource(R.string.share),
+                        )
+                    }
                 }
             }
             DetailCell(

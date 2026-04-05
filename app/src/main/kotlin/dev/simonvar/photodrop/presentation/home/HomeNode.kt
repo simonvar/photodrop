@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun HomeNode(
     onNavigateToTrash: () -> Unit,
+    onNavigateToFavorites: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SwipeViewModel = viewModel(
         factory = SwipeViewModel.factory(
@@ -45,7 +46,9 @@ fun HomeNode(
         topBar = {
             HomeTopBar(
                 trashCount = state.trashCount,
+                favoritesCount = state.favoritesCount,
                 onNavigateToTrash = onNavigateToTrash,
+                onNavigateToFavorites = onNavigateToFavorites,
             )
         },
     ) { padding ->
@@ -99,6 +102,7 @@ fun HomeNode(
                                         onSwipeProgress = { swipeProgress = it },
                                         isMuted = state.isMuted,
                                         onToggleMute = viewModel::toggleMute,
+                                        onFavoriteChanged = viewModel::onFavoriteChanged,
                                         programmaticSwipe = if (isSlotAFront) programmaticSwipe else null,
                                         onProgrammaticSwipeConsumed = { programmaticSwipe = null },
                                         modifier = Modifier
@@ -119,6 +123,7 @@ fun HomeNode(
                                         onSwipeProgress = { swipeProgress = it },
                                         isMuted = state.isMuted,
                                         onToggleMute = viewModel::toggleMute,
+                                        onFavoriteChanged = viewModel::onFavoriteChanged,
                                         programmaticSwipe = if (!isSlotAFront) programmaticSwipe else null,
                                         onProgrammaticSwipeConsumed = { programmaticSwipe = null },
                                         modifier = Modifier

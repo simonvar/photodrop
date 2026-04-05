@@ -9,6 +9,7 @@ data class SwipeState(
     val isLoading: Boolean = true,
     val isMuted: Boolean = true,
     val trashCount: Int = 0,
+    val favoritesCount: Int = 0,
     val history: List<HistoryEntry> = emptyList(),
 ) : ViewState {
 

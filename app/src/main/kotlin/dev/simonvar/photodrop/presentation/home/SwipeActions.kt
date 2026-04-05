@@ -14,7 +14,7 @@ class LoadMediaAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
         val items = withContext(Dispatchers.IO) {
             dependencies.repository.loadAllMedia()
         }
-        scope.setState { copy(items = items, isLoading = false) }
+        scope.setState { copy(items = items, favoritesCount = items.count { it.isFavorite }, isLoading = false) }
     }
 }
 

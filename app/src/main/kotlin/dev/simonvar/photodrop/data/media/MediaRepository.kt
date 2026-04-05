@@ -9,7 +9,11 @@ interface MediaRepository {
 
     fun loadAllMedia(): List<MediaItem>
 
+    fun loadFavoriteMedia(): List<MediaItem>
+
     fun findItemById(id: Long): MediaItem?
 
     fun createDeleteRequest(activity: Activity, uris: List<Uri>): IntentSenderRequest?
+
+    fun createFavoriteRequest(activity: Activity, uris: List<Uri>, isFavorite: Boolean): IntentSenderRequest?
 }

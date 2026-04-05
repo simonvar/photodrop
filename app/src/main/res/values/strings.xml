@@ -38,4 +38,8 @@
     <string name="resolution_format">%1$d x %2$d</string>
     <string name="duration_format">%1$dm %2$ds</string>
     <string name="share">Share</string>
+    <string name="favorites">Favorites</string>
+    <string name="favorites_empty">No favorites yet</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
 </resources>

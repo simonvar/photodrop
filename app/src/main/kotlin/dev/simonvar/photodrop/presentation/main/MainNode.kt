@@ -12,6 +12,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import dev.simonvar.photodrop.presentation.favorites.Favorites
+import dev.simonvar.photodrop.presentation.favorites.FavoritesNode
 import dev.simonvar.photodrop.presentation.home.HomeNode
 import dev.simonvar.photodrop.presentation.home.Home
 import dev.simonvar.photodrop.presentation.trash.TrashNode
@@ -33,10 +35,17 @@ fun MainNode() {
                 HomeNode(
                     modifier = Modifier.fillMaxSize(),
                     onNavigateToTrash = { navBackStack.add(Trash) },
+                    onNavigateToFavorites = { navBackStack.add(Favorites) },
                 )
             }
             entry<Trash> {
                 TrashNode(
+                    modifier = Modifier.fillMaxSize(),
+                    onBack = { navBackStack.removeLastOrNull() }
+                )
+            }
+            entry<Favorites> {
+                FavoritesNode(
                     modifier = Modifier.fillMaxSize(),
                     onBack = { navBackStack.removeLastOrNull() }
                 )
