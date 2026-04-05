@@ -4,8 +4,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +45,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -83,6 +86,7 @@ fun SwipeCard(
     onProgrammaticSwipeConsumed: () -> Unit = {},
     onSwipeProgress: (Float) -> Unit = {},
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     var cardWidth by remember { mutableFloatStateOf(1f) }
@@ -244,6 +248,14 @@ fun SwipeCard(
         MediaDetailBottomSheet(
             state = detailState,
             onDismiss = { showDetails = false },
+            onShare = {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = item.mimeType
+                    putExtra(Intent.EXTRA_STREAM, item.uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(shareIntent, null))
+            },
         )
     }
 }
@@ -373,6 +385,7 @@ private fun MediaInfoBar(
 private fun MediaDetailBottomSheet(
     state: MediaDetailState,
     onDismiss: () -> Unit,
+    onShare: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -382,10 +395,22 @@ private fun MediaDetailBottomSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(
-                text = stringResource(R.string.media_details),
-                style = MaterialTheme.typography.titleLarge,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.media_details),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                IconButton(onClick = onShare) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_share_24),
+                        contentDescription = stringResource(R.string.share),
+                    )
+                }
+            }
             DetailCell(
                 label = stringResource(R.string.label_file_name),
                 value = state.displayName,

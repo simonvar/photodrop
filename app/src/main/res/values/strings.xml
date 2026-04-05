@@ -37,4 +37,5 @@
     <string name="label_unknown">Unknown</string>
     <string name="resolution_format">%1$d x %2$d</string>
     <string name="duration_format">%1$dm %2$ds</string>
+    <string name="share">Share</string>
 </resources>
