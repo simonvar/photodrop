@@ -1,7 +1,6 @@
 package dev.simonvar.photodrop.data.trash
 
 import dev.simonvar.photodrop.data.MediaItem
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

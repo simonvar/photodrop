@@ -48,16 +48,18 @@ import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaType
 import dev.simonvar.photodrop.ui.block.VideoPlayer
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format.char
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toLocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlin.math.abs
-import kotlin.time.Instant
 
 private const val SWIPE_THRESHOLD_FRACTION = 0.4f
 private const val MAX_ROTATION_DEGREES = 15f
 private const val FLY_OFF_DURATION_MS = 300
+
+private val LocalizedDateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
 
 enum class SwipeDirection { LEFT, RIGHT }
 
@@ -236,22 +238,14 @@ private data class MediaInfoBarState(
     val mediaType: MediaType,
 )
 
-private val DateFormat = LocalDate.Format {
-    dayOfMonth()
-    char('.')
-    monthNumber()
-    char('.')
-    year()
-}
-
 @Composable
 private fun rememberMediaInfoBarState(item: MediaItem): MediaInfoBarState {
     val res = LocalResources.current
     return remember(item) {
-        val localDate = Instant
-            .fromEpochSeconds(item.addedAt.epochSeconds)
+        val javaLocalDate = item.addedAt
             .toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val formattedDate = DateFormat.format(localDate)
+            .toJavaLocalDate()
+        val formattedDate = javaLocalDate.format(LocalizedDateFormat)
         val sizeMb = item.size / 1_048_576.0
         val formattedSize = res.getString(R.string.size_mb, sizeMb)
         MediaInfoBarState(formattedDate, formattedSize, sizeMb, item.mediaType)
